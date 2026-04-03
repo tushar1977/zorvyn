@@ -17,7 +17,7 @@ def get_roles():
     return success_response([r.to_dict() for r in roles], "roles fetched")
 
 
-@role_bp.route("/assign/<int:user_id>", methods=["PATCH"])
+@role_bp.route("/assign/<string:user_id>", methods=["PATCH"])
 @login_required
 @require_role("admin")
 def assign_role(user_id):

@@ -1,3 +1,4 @@
+import uuid
 from sqlalchemy import (
     Integer,
     DateTime,
@@ -8,6 +9,7 @@ from sqlalchemy import (
     Text,
     Enum,
 )
+from sqlalchemy.dialects.postgresql import UUID
 from app.extensions import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, timezone
@@ -21,7 +23,9 @@ from app.utils.enums import RecordType
 class FinancialRecord(db.Model):
     __tablename__ = "financial_records"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     category_id: Mapped[int] = mapped_column(

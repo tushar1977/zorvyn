@@ -6,12 +6,16 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum
 from app.extensions import db
 from app.utils.enums import UserStatus
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 
 class User(db.Model):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
 
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), nullable=False)
 
