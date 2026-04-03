@@ -3,7 +3,7 @@ from app import create_app
 
 env = os.environ.get("FLASK_ENV")
 
-app = create_app(env)
+fapp = create_app(env)
 
 
 if __name__ == "__main__":
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     debug = os.environ.get("FLASK_DEBUG", "True").lower() in ("true", "1", "yes")
     if env == "prod":
         print("Running in production mode")
-        app.run(
+        fapp.run(
             host=host,
             port=port,
             debug=False,
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     else:
         print("Running in Dev mode")
 
-        app.run(
+        fapp.run(
             host=host,
             port=port,
             debug=True,

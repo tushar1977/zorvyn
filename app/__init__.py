@@ -24,4 +24,9 @@ def create_app(config_name="development"):
 
     app.logger.info("JWT callbacks registered")
 
+    from app import models
+
+    from app.routes import register_routes
+
+    register_routes(app)
     return app
