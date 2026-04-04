@@ -266,7 +266,18 @@ invalid auth, 403 for insufficient permissions, 404 for missing resources.
 
 ---
 
+## Additional Thoughtfulness
+
+1) **Validation** Implemented a custom layer of validation for values, types, formats etc in ```app/utils/validation.py```
+2) **Pagination** All GET routes are completely paginated.
+3) **Custom Request Response**
+4) **JWT Authentication**
+5) **logger** Implemented a custom logger that wraps the whole application for better logging.
 ## Setup
+For testing, use this JWT token - 
+```
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NTMwMzE5OCwianRpIjoiMzdkNWI1OTctZjA5MS00NWE1LTlmMWYtYzkxYzQ1OWQ4NWQ4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjU0N2MxZjY1LWViZjgtNDdjOC1iNGQ1LTA2ZjNlYjM3ZWU1ZCIsIm5iZiI6MTc3NTMwMzE5OCwiY3NyZiI6IjU1YmYzZGE5LTBkNjktNGEyZi1hNTg1LWZlYmU3ZTM5ZmIzNSIsImV4cCI6MTc3NzAzMTE5OH0.VHl8B-tYNLPBHSybP7Fh2mN_NwcslMsw5_r4R-Ov4EA
+```
 
 **1. Clone and install dependencies**
 ```bash
@@ -277,10 +288,10 @@ pip install -r requirements.txt
 
 **2. Configure environment**
 ```bash
-cp .env.example .env
-# edit .env with your database URL and secret keys
-as for this example, env-example contains all the keys that is use to run this backend.
+cp env_example .env
 ```
+as for this example, env_example contains all the keys that is use to run this backend.
+
 
 **3. Run the server**
 ```bash
@@ -292,4 +303,5 @@ For running it via docker, Dockerfile is already present
 docker buildx build -t zorvyn .
 docker run -d -p 3000:3000 --env-file=.env zorvyn:latest
 ```
+ **All API's are avaiable in ```http://localhost:3000/docs```
 
