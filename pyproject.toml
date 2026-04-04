@@ -1,5 +1,0 @@
-[project]
-name = "zorvyn-backend"
-version = "0.1.0"
-description = "Zorvyn Flask Backend Application"
-requires-python = ">=3.8"
