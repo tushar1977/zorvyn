@@ -2,7 +2,7 @@ from flask import Blueprint
 from sqlalchemy.sql.expression import text
 from app.extensions import db
 
-health_bp = Blueprint("health", __name__, url_prefix="/health")
+health_bp = Blueprint("health", __name__, url_prefix="/")
 
 
 @health_bp.route("/ping", methods=["GET"])
