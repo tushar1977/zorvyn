@@ -6,52 +6,37 @@ A role-based financial records management system built with Flask and MySQL.
 
 ## Tech Stack
 
-| Layer          | Choice                  |
-|----------------|-------------------------|
-| Framework      | Flask                   |
-| Database       | MySQL + Flask-SQLAlchemy|
-| Auth           | Flask-JWT-Extended      |
-| Validation     | Custom + Marshmallow    |
-| Migrations     | Flask-Migrate (Alembic) |
-| Password Hash  | Flask-Bcrypt            |
+| Layer          | Choice                   |
+|----------------|--------------------------|
+| Framework      | Flask                    |
+| Database       | MySQL + Flask-SQLAlchemy |
+| Auth           | Flask-JWT-Extended       |
+| Validation     | Custom + Marshmallow     |
+| Migrations     | Flask-Migrate (Alembic)  |
+| Password Hash  | Flask-Bcrypt             |
 
 ---
 
 ## Why Flask
-Its a lightweight framework and does not impose a project structure or bundle feature that this project does not need. Every component, the ORM,
-the auth layer, the validation, is wired in consciously. This makes the architecture easier to read and reason about, which matters for a backend that is being evaluated for clarity of thinking.
 
-Its allows for rapid development without compromising in security, features and structure. Some of its features are - 
+Flask is a lightweight framework that does not impose a project structure or bundle features the project does not need. Every component — the ORM, the auth layer, the validation — is wired in consciously. This makes the architecture easier to read and reason about, which matters for a backend that is being evaluated for clarity of thinking.
+
+It allows for rapid development without compromising on security, features, or structure. Key characteristics:
+
 - **Lightweight and explicit.**
-- **Blueprints map cleanly to domains.** 
-
+- **Blueprints map cleanly to domains.**
 
 ## Why MySQL
 
-Financial data is relational by nature. Users own records. Records belong to
-categories. Roles govern users. These relationships are explicit and fixed,
-which is exactly what a relational database is designed for.
+Financial data is relational by nature. Users own records. Records belong to categories. Roles govern users. These relationships are explicit and fixed, which is exactly what a relational database is designed for.
 
+**JOINs are natural here.** Dashboard aggregations like category-wise totals and monthly trends require grouping across related tables. SQL aggregation with `GROUP BY` and `SUM` is the right tool for this, not application-level computation.
 
-**JOINs are natural here.** Dashboard aggregations like category-wise totals
-and monthly trends require grouping across related tables. SQL aggregation
-with GROUP BY and SUM is the right tool for this, not application-level
-computation.
+**Schema enforcement.** MySQL enforces column types, foreign key constraints, and `NOT NULL` rules at the database level, not just the application level. This acts as a second line of defense after application validation.
 
-**Schema enforcement.** MySQL enforces column types, foreign key constraints,
-and NOT NULL rules at the database level, not just the application level. This
-is a second line of defense after application validation.
+**SQLAlchemy as the ORM.** Flask-SQLAlchemy provides clean Python model definitions while still allowing raw SQL when needed. Flask-Migrate (Alembic) handles schema changes through versioned migration files, which is the production-standard approach.
 
-**SQLAlchemy as the ORM.** Flask-SQLAlchemy gives clean Python model
-definitions while still allowing raw SQL when needed. Flask-Migrate (Alembic)
-handles schema changes through versioned migration files, which is the
-production-standard approach.
-
-The alternative that i considered was MongoDB. Document databases are flexible and uses BJSON format but
-that flexibility works against financial data where the schema should be
-strict and relationships should be enforced. MongoDB was ruled out because
-the lack of joins would push relationship handling into the application layer,
-adding complexity without benefit. Although the joins could be achieved by the aggregation pipeline, but i feel that for this project, MySQL was the best option.
+The alternative considered was MongoDB. Document databases are flexible and use BSON format, but that flexibility works against financial data where the schema should be strict and relationships should be enforced. MongoDB was ruled out because the lack of native joins would push relationship handling into the application layer, adding complexity without benefit. Although joins can be achieved via the aggregation pipeline, MySQL is the better fit for this project.
 
 ---
 
@@ -61,7 +46,6 @@ The schema has five tables. Every design decision is intentional.
 
 <img width="1824" height="1278" alt="image" src="https://github.com/user-attachments/assets/43deed47-2d8f-4161-85cb-ac1630d8cb56" />
 
-
 ### `roles`
 ```sql
 id          UUID PRIMARY KEY
@@ -69,11 +53,7 @@ name        VARCHAR(50) UNIQUE NOT NULL   -- viewer | analyst | admin
 description VARCHAR(255)
 ```
 
-Roles are stored as a table rather than an enum on the users table. This
-means new roles can be added without a schema migration. The application's
-role-based access control reads role names at runtime, so adding a new role
-is a single INSERT, not a code change.
-There are currently 3 roles - viewer, analyst and admin
+Roles are stored as a table rather than an enum on the users table. This means new roles can be added without a schema migration. The application's role-based access control reads role names at runtime, so adding a new role is a single `INSERT`, not a code change. There are currently 3 roles: viewer, analyst, and admin.
 
 ### `users`
 ```sql
@@ -87,15 +67,11 @@ created_at    DATETIME
 updated_at    DATETIME
 ```
 
-`status` stores whether the account is enabled, not whether the user is
-online. Active/inactive is an admin-controlled state. Inactive users are
-rejected at the auth middleware layer before any route logic runs.
+`status` stores whether the account is enabled, not whether the user is currently online. Active/inactive is an admin-controlled state. Inactive users are rejected at the auth middleware layer before any route logic runs.
 
-`password_hash` stores a bcrypt hash. Passwords are never stored or logged
-in plain text anywhere in the system.
+`password_hash` stores a bcrypt hash. Passwords are never stored or logged in plain text anywhere in the system.
 
-`updated_at` uses SQLAlchemy's `onupdate` trigger so it is maintained
-automatically without application code.
+`updated_at` uses SQLAlchemy's `onupdate` trigger so it is maintained automatically without application code.
 
 ### `categories`
 ```sql
@@ -104,11 +80,7 @@ name VARCHAR(100) UNIQUE NOT NULL
 type ENUM(20) NOT NULL   -- income | expense
 ```
 
-Categories are a lookup table rather than a text field on financial
-records. This prevents data inconsistency (salary vs Salary vs SALARY) and
-makes category-wise aggregation queries reliable for dashboard. The `type` field on a
-category defines whether it is an income or expense category which is an enum and speeds
-up dashboard queries that need to separate the two.
+Categories are a lookup table rather than a free-text field on financial records. This prevents data inconsistency (e.g. `salary` vs `Salary` vs `SALARY`) and makes category-wise aggregation queries reliable for the dashboard. The `type` field defines whether a category is income or expense, which speeds up dashboard queries that need to separate the two.
 
 ### `financial_records`
 ```sql
@@ -124,19 +96,11 @@ created_at  DATETIME
 updated_at  DATETIME
 ```
 
-`type` is stored directly on the record even though it can be derived from
-the category. Dashboard queries that filter or group by income vs expense do not need a JOIN to the categories
-table to get this field. It trades a small amount of storage for significantly
-simpler and faster aggregation queries.
+`type` is stored directly on the record even though it can be derived from the category. Dashboard queries that filter or group by income vs expense do not need a JOIN to the categories table for this field. This trades a small amount of storage for significantly simpler and faster aggregation queries. Note: application-level logic ensures `record.type` always matches `category.type` to prevent inconsistency.
 
-`record_date` is a DATE field separate from `created_at`. A user entering a
-past transaction should record when it happened, not when they entered it into
-the system. `created_at` tracks system insertion time, `record_date` tracks
-the actual financial event.
+`record_date` is a `DATE` field separate from `created_at`. A user entering a past transaction should record when it happened, not when they entered it into the system. `created_at` tracks system insertion time; `record_date` tracks the actual financial event.
 
-`is_deleted` implements soft delete. Financial records should not be
-permanently destroyed. Soft delete preserves the audit trail, allows admins
-to recover mistaken deletions, and keeps historical aggregations accurate.
+`is_deleted` implements soft delete. Financial records should not be permanently destroyed. Soft delete preserves the audit trail, allows admins to recover mistaken deletions, and keeps historical aggregations accurate.
 
 ### `audit_logs`
 ```sql
@@ -147,7 +111,6 @@ table_name VARCHAR(50) NOT NULL
 record_id  INT
 created_at DATETIME
 ```
-
 
 ---
 
@@ -163,41 +126,41 @@ created_at DATETIME
 │   └── app.log                       # file-based logs written by logger.py
 │
 └── app/                              # core application package
-    ├── __init__.py                   # app factory 
+    ├── __init__.py                   # app factory
     ├── config.py                     # DevelopmentConfig, ProductionConfig, TestingConfig classes
     ├── extensions.py                 # db, jwt, bcrypt, migrate instances (initialized without app)
     │
     ├── models/                       # SQLAlchemy ORM models, one file per table
-    │   ├── __init__.py               
-    │   ├── role.py                 
-    │   ├── user.py                   
-    │   ├── category.py               
-    │   ├── financial_record.py      
-    │   └── audit_log.py              
+    │   ├── __init__.py
+    │   ├── role.py
+    │   ├── user.py
+    │   ├── category.py
+    │   ├── financial_record.py
+    │   └── audit_log.py
     │
     ├── routes/                       # Flask blueprints, HTTP layer only (no business logic)
-    │   ├── __init__.py               
-    │   ├── auth_routes.py            
-    │   ├── user_routes.py            
-    │   ├── role_routes.py           
-    │   ├── record_routes.py          
-    │   ├── category_routes.py        
-    │   ├── dashboard_routes.py       
-    │   └── health_routes.py          
+    │   ├── __init__.py
+    │   ├── auth_routes.py
+    │   ├── user_routes.py
+    │   ├── role_routes.py
+    │   ├── record_routes.py
+    │   ├── category_routes.py
+    │   ├── dashboard_routes.py
+    │   └── health_routes.py
     │
     ├── services/                     # business logic layer, called by routes, calls models
-    │   ├── auth_service.py          
-    │   ├── user_service.py          
-    │   ├── role_service.py          
-    │   ├── record_service.py        
-    │   ├── category_service.py      
-    │   └── dashboard_service.py    
+    │   ├── auth_service.py
+    │   ├── user_service.py
+    │   ├── role_service.py
+    │   ├── record_service.py
+    │   ├── category_service.py
+    │   └── dashboard_service.py
     │
     ├── middleware/                   # decorators that run before route handlers
-    │   ├── auth.py                   #  verifies JWT and loads g.current_user
-    │   └── role.py                   # checks currentuser role
+    │   ├── auth.py                   # verifies JWT and loads g.current_user
+    │   └── role.py                   # checks current_user role
     │
-    └── utils/                        
+    └── utils/
         ├── enums.py                  # constants like RoleType, RecordType, UserStatus
         ├── validator.py              # input validation functions, raises ValueError on bad input
         ├── response.py               # success_response() and error_response() for consistent JSON shape
@@ -206,6 +169,8 @@ created_at DATETIME
         ├── date_helpers.py           # date range builders for monthly/weekly trend queries
         └── logger.py                 # configures Python logging, writes to logs/app.log
 ```
+
+---
 
 ## Access Control
 
@@ -226,10 +191,7 @@ Three roles with distinct permissions:
 | Manage users            | no     | no      | yes   |
 | View recent activity    | no     | no      | yes   |
 
-Access control is enforced in two layers. The `@login_required` decorator
-verifies the JWT token and checks the user is active. The `@require_role`
-decorator checks the user's role against the allowed roles for that route.
-Both run before any route logic executes.
+Access control is enforced in two layers. The `@login_required` decorator verifies the JWT token and checks that the user is active. The `@require_role` decorator checks the user's role against the allowed roles for that route. Both run before any route logic executes.
 
 ---
 
@@ -237,20 +199,42 @@ Both run before any route logic executes.
 
 JWT (JSON Web Tokens) via Flask-JWT-Extended.
 
-- Login returns an access token (currently for testing its 3 days) and a refresh token (7 days)
+- Login returns an access token (1 hour expiry) and a refresh token (7 days)
 - Every protected route requires `Authorization: Bearer <access_token>`
 - Inactive users are rejected at the middleware layer regardless of token validity
 
-JWT was chosen over Flask session + Redis (It will be implemented in production) because this is a REST API backend.
-Sessions require cookie handling and server-side state, which adds
-infrastructure complexity (Redis) and CORS complications when the frontend
-and backend are on different origins.
+JWT was chosen over Flask session + Redis because this is a REST API backend. Sessions require cookie handling and server-side state, which adds infrastructure complexity (Redis) and CORS complications when the frontend and backend are on different origins. A Redis-backed session store remains an option for the production deployment path.
+
+---
+
+## Validation
+
+Input validation is handled in `app/utils/validator.py`. Validators raise `ValueError` with descriptive messages on failure; routes catch these and return structured error responses.
+
+**What is validated:**
+
+- **Presence checks** — required fields like `amount`, `category_id`, `record_date`, and `email` are checked before any database operation runs.
+- **Type checks** — `amount` must be a positive number; `record_date` must be a valid ISO date string; `type` must be one of the allowed enum values (`income` or `expense`).
+- **Format checks** — email addresses are validated against a standard format; passwords are checked for minimum length.
+- **Referential checks** — `category_id` and `role_id` are validated to exist in the database before being assigned to a record or user.
+- **Business rule checks** — for example, a user cannot be assigned a role that does not exist, and a record's `type` must match its category's `type` to prevent inconsistency between the denormalized field and the lookup table.
+
+**Example error response for a failed validation:**
+```json
+{
+  "status": "error",
+  "message": "amount must be a positive number",
+  "data": null
+}
+```
+
+All validation runs before any write operation. The database never receives malformed data.
+
 ---
 
 ## Error Handling
 
-Errors are raised as `ValueError` in validators and services with descriptive
-messages. Routes catch them and return consistent JSON error responses.
+Errors are raised as `ValueError` in validators and services with descriptive messages. Routes catch them and return consistent JSON error responses.
 
 Every response follows the same envelope:
 ```json
@@ -261,23 +245,23 @@ Every response follows the same envelope:
 }
 ```
 
-HTTP status codes are used correctly. 400 for bad input, 401 for missing or
-invalid auth, 403 for insufficient permissions, 404 for missing resources.
+HTTP status codes are used correctly: `400` for bad input, `401` for missing or invalid auth, `403` for insufficient permissions, `404` for missing resources.
 
 ---
 
 ## Additional Thoughtfulness
 
-1) **Validation** Implemented a custom layer of validation for values, types, formats etc in ```app/utils/validation.py```
-2) **Pagination** All GET routes are completely paginated.
-3) **Custom Request Response**
-4) **JWT Authentication**
-5) **logger** Implemented a custom logger that wraps the whole application for better logging.
+1. **Validation** — A custom validation layer in `app/utils/validator.py` handles value types, formats, presence, and business rules before any database writes occur.
+2. **Pagination** — All list endpoints are fully paginated via `app/utils/pagination.py`.
+3. **Consistent response envelope** — Every response, success or error, follows the same JSON shape.
+4. **JWT Authentication** — Stateless auth with access and refresh tokens; inactive users are blocked at the middleware layer.
+5. **Structured logging** — A custom logger wraps the entire application and writes to `logs/app.log` for easier debugging and audit trails.
+6. **Soft delete** — Financial records are never permanently destroyed, preserving the audit trail and allowing admin recovery.
+7. **Audit logs** — Every `CREATE`, `UPDATE`, and `DELETE` action is recorded with the acting user and affected record.
+
+---
+
 ## Setup
-For testing, use this JWT token - 
-```
-Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NTMwMzE5OCwianRpIjoiMzdkNWI1OTctZjA5MS00NWE1LTlmMWYtYzkxYzQ1OWQ4NWQ4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjU0N2MxZjY1LWViZjgtNDdjOC1iNGQ1LTA2ZjNlYjM3ZWU1ZCIsIm5iZiI6MTc3NTMwMzE5OCwiY3NyZiI6IjU1YmYzZGE5LTBkNjktNGEyZi1hNTg1LWZlYmU3ZTM5ZmIzNSIsImV4cCI6MTc3NzAzMTE5OH0.VHl8B-tYNLPBHSybP7Fh2mN_NwcslMsw5_r4R-Ov4EA
-```
 
 **1. Clone and install dependencies**
 ```bash
@@ -290,18 +274,28 @@ pip install -r requirements.txt
 ```bash
 cp env_example .env
 ```
-as for this example, env_example contains all the keys that is use to run this backend.
 
+`env_example` contains all the keys required to run the backend. Fill in your database credentials and JWT secret before starting.
 
 **3. Run the server**
 ```bash
 python3 server.py
 ```
 
-For running it via docker, Dockerfile is already present
+**Running via Docker:**
 ```bash
 docker buildx build -t zorvyn .
 docker run -d -p 3000:3000 --env-file=.env zorvyn:latest
 ```
- **All API's are avaiable in ```http://localhost:3000/docs```
 
+**API documentation is available at** `http://localhost:3000/docs`
+
+---
+
+## Testing
+
+A test JWT token for development is available on request. Here is the token
+```
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NTMwMzE5OCwianRpIjoiMzdkNWI1OTctZjA5MS00NWE1LTlmMWYtYzkxYzQ1OWQ4NWQ4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjU0N2MxZjY1LWViZjgtNDdjOC1iNGQ1LTA2ZjNlYjM3ZWU1ZCIsIm5iZiI6MTc3NTMwMzE5OCwiY3NyZiI6IjU1YmYzZGE5LTBkNjktNGEyZi1hNTg1LWZlYmU3ZTM5ZmIzNSIsImV4cCI6MTc3NzAzMTE5OH0.VHl8B-tYNLPBHSybP7Fh2mN_NwcslMsw5_r4R-Ov4EA
+```
+For production evaluation, register a user via the `/auth/register` endpoint and use the returned access token.
