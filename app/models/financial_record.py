@@ -1,6 +1,5 @@
 import uuid
 from sqlalchemy import (
-    Integer,
     DateTime,
     Date,
     Numeric,

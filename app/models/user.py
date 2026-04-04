@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import List
 from app.extensions import bcrypt
-from sqlalchemy import Integer, String, DateTime, ForeignKey
+from sqlalchemy import String, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Enum
 from app.extensions import db

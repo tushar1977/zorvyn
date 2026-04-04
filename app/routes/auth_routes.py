@@ -28,12 +28,14 @@ def login():
     return success_response(result, "login successful")
 
 
+# Currently dummy routes
 @auth_bp.route("/refresh", methods=["POST"])
 @login_required
 def refresh():
     return success_response(AuthService.refresh(g.current_user), "session refreshed")
 
 
+# Currently dummy routes
 @auth_bp.route("/logout", methods=["POST"])
 @login_required
 def logout():

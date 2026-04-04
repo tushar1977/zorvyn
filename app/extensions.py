@@ -7,7 +7,6 @@ from flask_limiter.util import get_remote_address
 
 db = SQLAlchemy()
 jwt = JWTManager()
-migrate = Migrate()
 bcrypt = Bcrypt()
 migrate = Migrate()
 limiter = Limiter(
@@ -17,7 +16,6 @@ limiter = Limiter(
 )
 
 
-# JWT callback error handling
 def register_jwt_callbacks(app):
 
     @jwt.unauthorized_loader

@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 
 from app.models.financial_record import RecordType
 from app.models.category import CategoryType
@@ -62,3 +63,17 @@ def validate_record_type(value):
     except Exception:
         allowed = [e.value for e in RecordType]
         raise ValueError(f"type must be one of {allowed}")
+
+
+def validate_id(id_value):
+    if not id_value:
+        raise ValueError("ID cannot be empty")
+
+    try:
+        if isinstance(id_value, uuid.UUID):
+            return id_value
+
+        uuid_obj = uuid.UUID(str(id_value))
+        return uuid_obj
+    except (ValueError, AttributeError, TypeError):
+        raise ValueError("invalid ID format: must be a valid UUID")

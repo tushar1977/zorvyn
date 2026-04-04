@@ -2,6 +2,7 @@ from app.models.user import User
 from app.models.role import Role
 from app.extensions import db
 from app.utils.enums import UserStatus
+from app.utils.validator import validate_email, validate_required_fields
 
 
 class UserService:
@@ -12,8 +13,11 @@ class UserService:
         password = data.get("password")
         role_name = data.get("role")
 
-        if not name or not email or not password:
-            return None, "name, email, password required"
+        try:
+            validate_required_fields(data, ["name", "email", "password"])
+            validate_email(data.get("email"))
+        except ValueError as e:
+            return None, str(e)
 
         if User.query.filter_by(email=email).first():
             return None, "email already exists"

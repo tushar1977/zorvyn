@@ -33,28 +33,24 @@ def get_users():
 
 @user_bp.route("/<string:user_id>", methods=["GET"])
 @login_required
+@require_role("admin")
 def get_user(user_id):
     user = UserService.get_user_by_id(user_id)
 
     if not user:
         return error_response("user not found", 404)
 
-    if g.current_user.id != user.id and g.current_user.role.name != "admin":
-        return error_response("forbidden", 403)
-
     return success_response(user.to_dict(), "user fetched")
 
 
 @user_bp.route("/<string:user_id>", methods=["PUT"])
 @login_required
+@require_role("admin")
 def update_user(user_id):
     user = UserService.get_user_by_id(user_id)
 
     if not user:
         return error_response("user not found", 404)
-
-    if g.current_user.id != user.id and g.current_user.role.name != "admin":
-        return error_response("forbidden", 403)
 
     updated_user, error = UserService.update_user(user, request.json)
 

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Optional
 import uuid
 
-from sqlalchemy import Integer, String, DateTime, ForeignKey
+from sqlalchemy import String, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import UUID
 

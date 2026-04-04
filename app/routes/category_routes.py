@@ -5,9 +5,7 @@ from app.middleware.role import require_role
 from app.utils.response import success_response, error_response
 
 from app.services.category_service import (
-    create_category,
-    get_categories,
-    seed_categories,
+    CategoryService,
 )
 
 category_bp = Blueprint("categories", __name__, url_prefix="/categories")
@@ -18,7 +16,7 @@ category_bp = Blueprint("categories", __name__, url_prefix="/categories")
 @require_role("admin")
 def add_category():
     try:
-        category = create_category(request.json)
+        category = CategoryService.create_category(request.json)
 
         return success_response(category.to_dict(), "category created")
 
@@ -30,7 +28,7 @@ def add_category():
 @login_required
 def fetch_categories():
     try:
-        categories = get_categories()
+        categories = CategoryService.get_categories()
 
         page, limit = get_pagination_params()
         data = paginate_query(categories, page, limit)
@@ -45,7 +43,7 @@ def fetch_categories():
 @require_role("admin")
 def seed():
     try:
-        created = seed_categories()
+        created = CategoryService.seed_categories()
 
         return success_response({"created": created}, "categories seeded")
 
