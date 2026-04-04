@@ -59,6 +59,9 @@ adding complexity without benefit. Although the joins could be achieved by the a
 
 The schema has five tables. Every design decision is intentional.
 
+<img width="1824" height="1278" alt="image" src="https://github.com/user-attachments/assets/43deed47-2d8f-4161-85cb-ac1630d8cb56" />
+
+
 ### `roles`
 ```sql
 id          UUID PRIMARY KEY
