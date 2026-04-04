@@ -18,6 +18,7 @@ markupsafe==3.0.3
 ordered-set==4.1.0
 packaging==26.0
 psycopg2==2.9.11
+flasgger
 pyjwt==2.12.1
 python-dotenv==1.2.2
 sqlalchemy==2.0.48

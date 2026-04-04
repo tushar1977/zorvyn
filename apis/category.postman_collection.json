@@ -1,0 +1,49 @@
+{
+  "info": {
+    "_postman_id": "c97c6bec-b449-4f5f-a364-f9f3860316f1",
+    "name": "category",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "32892402"
+  },
+  "item": [
+    {
+      "name": "mock data for categories",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/categories/seed",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "categories",
+            "seed"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

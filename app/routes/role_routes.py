@@ -12,6 +12,17 @@ role_bp = Blueprint("roles", __name__, url_prefix="/roles")
 @login_required
 @require_role("admin")
 def get_roles():
+    """
+    Get all roles
+    ---
+    tags:
+      - roles
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Roles fetched successfully
+    """
     roles = RoleService.get_all_roles()
 
     return success_response([r.to_dict() for r in roles], "roles fetched")
@@ -21,6 +32,39 @@ def get_roles():
 @login_required
 @require_role("admin")
 def assign_role(user_id):
+    """
+    Assign role to user
+    ---
+    tags:
+      - roles
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: user_id
+        in: path
+        type: string
+        required: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - role
+            properties:
+              role:
+                type: string
+                enum: [admin, analyst, viewer]
+                example: analyst
+    responses:
+      200:
+        description: Role updated successfully
+      400:
+        description: Invalid role
+      404:
+        description: User not found
+    """
     user = UserService.get_user_by_id(user_id)
 
     if not user:
@@ -38,6 +82,17 @@ def assign_role(user_id):
 @login_required
 @require_role("admin")
 def create_roles():
+    """
+    Seed default roles
+    ---
+    tags:
+      - roles
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Roles seeded successfully
+    """
     result, error = RoleService.seed_roles()
 
     if error:
