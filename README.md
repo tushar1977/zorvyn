@@ -293,7 +293,8 @@ docker run -d -p 3000:3000 --env-file=.env zorvyn:latest
 
 ## Testing
 
-The backend is hosted on serverless plateform (Vercel) URL - ```https://zorvyn-indol.vercel.app/docs/```
+The backend is deployed on the serverless platform Vercel and is accessible at: ```https://zorvyn-indol.vercel.app/docs/```
+Since Vercel operates in a serverless environment, cold starts may occasionally impact response times.
 
 A test JWT token for development is available on request. Here is the token
 ```
