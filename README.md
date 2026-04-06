@@ -293,8 +293,10 @@ docker run -d -p 3000:3000 --env-file=.env zorvyn:latest
 
 ## Testing
 
+The backend is hosted on serverless plateform (Vercel) URL - ```https://zorvyn-indol.vercel.app/docs/```
+
 A test JWT token for development is available on request. Here is the token
 ```
-Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NTMwMzE5OCwianRpIjoiMzdkNWI1OTctZjA5MS00NWE1LTlmMWYtYzkxYzQ1OWQ4NWQ4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjU0N2MxZjY1LWViZjgtNDdjOC1iNGQ1LTA2ZjNlYjM3ZWU1ZCIsIm5iZiI6MTc3NTMwMzE5OCwiY3NyZiI6IjU1YmYzZGE5LTBkNjktNGEyZi1hNTg1LWZlYmU3ZTM5ZmIzNSIsImV4cCI6MTc3NzAzMTE5OH0.VHl8B-tYNLPBHSybP7Fh2mN_NwcslMsw5_r4R-Ov4EA
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3NTQ3NDc4MiwianRpIjoiMWQzNTc0NmQtZDhmNS00NWU3LWIwMTgtNmY4ZjNiYzIxNWU4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjU0N2MxZjY1LWViZjgtNDdjOC1iNGQ1LTA2ZjNlYjM3ZWU1ZCIsIm5iZiI6MTc3NTQ3NDc4MiwiY3NyZiI6Ijc2MDczNjI2LTk0ZTQtNGE2NS1hMDc0LWJiZmRlYzdhM2ExZCIsImV4cCI6MTc3ODA2Njc4Mn0.QHKxgcX-8VPBdGM-161Qn9Hgi3kRrViPZ_65aZYw5Bs
 ```
 For production evaluation, register a user via the `/auth/register` endpoint and use the returned access token.
