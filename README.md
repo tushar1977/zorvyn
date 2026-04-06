@@ -165,7 +165,7 @@ created_at DATETIME
         ├── validator.py              # input validation functions, raises ValueError on bad input
         ├── response.py               # success_response() and error_response() for consistent JSON shape
         ├── pagination.py             # extracts page/limit from query params, paginates SQLAlchemy query
-        ├── audit.py                  # log_action() writes to audit_logs, get_recent_activity()
+        ├── audit.py                  # (In work)log_action() writes to audit_logs, get_recent_activity()
         ├── date_helpers.py           # date range builders for monthly/weekly trend queries
         └── logger.py                 # configures Python logging, writes to logs/app.log
 ```
@@ -255,9 +255,8 @@ HTTP status codes are used correctly: `400` for bad input, `401` for missing or 
 2. **Pagination** — All list endpoints are fully paginated via `app/utils/pagination.py`.
 3. **Consistent response envelope** — Every response, success or error, follows the same JSON shape.
 4. **JWT Authentication** — Stateless auth with access and refresh tokens; inactive users are blocked at the middleware layer.
-5. **Structured logging** — A custom logger wraps the entire application and writes to `logs/app.log` for easier debugging and audit trails.
-6. **Soft delete** — Financial records are never permanently destroyed, preserving the audit trail and allowing admin recovery.
-7. **Audit logs** — Every `CREATE`, `UPDATE`, and `DELETE` action is recorded with the acting user and affected record.
+5. **Structured logging** — A custom logger wraps the entire application and writes to `logs/app.log` for easier debugging.
+6. **Soft delete** — Financial records are never permanently destroyed.
 
 ---
 
