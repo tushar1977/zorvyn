@@ -1,4 +1,4 @@
-from flask import Blueprint, request, g
+from flask import Blueprint, request
 from app.utils.pagination import paginate_query, get_pagination_params
 from app.services.user_service import UserService
 from app.middleware.auth import login_required
@@ -19,29 +19,29 @@ def create_user():
       - users
     security:
       - BearerAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - name
-              - email
-              - password
-            properties:
-              name:
-                type: string
-                example: Jane Doe
-              email:
-                type: string
-                example: jane@example.com
-              password:
-                type: string
-                example: password123
-              role_id:
-                type: string
-                example: 550e8400-e29b-41d4-a716-446655440000
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - name
+            - email
+            - password
+          properties:
+            name:
+              type: string
+              example: Jane Doe
+            email:
+              type: string
+              example: jane@example.com
+            password:
+              type: string
+              example: StrongPass@123
+            role_id:
+              type: string
+              example: 550e8400-e29b-41d4-a716-446655440000
     responses:
       200:
         description: User created successfully
@@ -72,13 +72,15 @@ def get_users():
     security:
       - BearerAuth: []
     parameters:
-      - name: page
-        in: query
+      - in: query
+        name: page
         type: integer
+        required: false
         default: 1
-      - name: limit
-        in: query
+      - in: query
+        name: limit
         type: integer
+        required: false
         default: 10
     responses:
       200:
@@ -107,8 +109,8 @@ def get_user(user_id):
     security:
       - BearerAuth: []
     parameters:
-      - name: user_id
-        in: path
+      - in: path
+        name: user_id
         type: string
         required: true
         example: 550e8400-e29b-41d4-a716-446655440000
@@ -118,12 +120,15 @@ def get_user(user_id):
       404:
         description: User not found
     """
-    user = UserService.get_user_by_id(user_id)
 
-    if not user:
-        return error_response("user not found", 404)
-
-    return success_response(user.to_dict(), "user fetched")
+    try:
+        user = UserService.get_user_by_id(user_id)
+        return success_response(user.to_dict(), "user fetched successfully")
+    except ValueError as e:
+        msg = str(e)
+        if "inactive" in msg:
+            return error_response(msg, 403)
+        return error_response(msg, 404)
 
 
 @user_bp.route("/<string:user_id>", methods=["PUT"])
@@ -138,23 +143,23 @@ def update_user(user_id):
     security:
       - BearerAuth: []
     parameters:
-      - name: user_id
-        in: path
+      - in: path
+        name: user_id
         type: string
         required: true
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-                example: Updated Name
-              email:
-                type: string
-                example: updated@example.com
+        example: 550e8400-e29b-41d4-a716-446655440000
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              example: Updated Name
+            email:
+              type: string
+              example: updated@example.com
     responses:
       200:
         description: User updated successfully
@@ -188,23 +193,23 @@ def update_status(user_id):
     security:
       - BearerAuth: []
     parameters:
-      - name: user_id
-        in: path
+      - in: path
+        name: user_id
         type: string
         required: true
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - status
-            properties:
-              status:
-                type: string
-                enum: [active, inactive]
-                example: active
+        example: 550e8400-e29b-41d4-a716-446655440000
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - status
+          properties:
+            status:
+              type: string
+              enum: [active, inactive]
+              example: active
     responses:
       200:
         description: Status updated successfully
@@ -213,7 +218,7 @@ def update_status(user_id):
       404:
         description: User not found
     """
-    user = UserService.get_user_by_id(user_id)
+    user = UserService.get_user(user_id)
 
     if not user:
         return error_response("user not found", 404)

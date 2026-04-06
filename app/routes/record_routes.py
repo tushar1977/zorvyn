@@ -115,46 +115,46 @@ def add_record():
       - records
     security:
       - BearerAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - amount
-              - type
-              - category_id
-              - record_date
-            properties:
-              amount:
-                type: number
-                example: 250.50
-              type:
-                type: string
-                enum: [income, expense]
-                example: expense
-              category_id:
-                type: string
-                example: 550e8400-e29b-41d4-a716-446655440002
-              record_date:
-                type: string
-                format: date
-                example: 2024-01-15
-              notes:
-                type: string
-                example: Groceries
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - amount
+            - type
+            - category_id
+            - record_date
+          properties:
+            amount:
+              type: number
+              example: 250.50
+            type:
+              type: string
+              enum: [income, expense]
+              example: expense
+            category_id:
+              type: string
+              example: 550e8400-e29b-41d4-a716-446655440002
+            record_date:
+              type: string
+              format: date
+              example: 2024-01-15
+            notes:
+              type: string
+              example: Groceries
     responses:
-      200:
+      201:
         description: Record created successfully
       400:
         description: Validation error
+      401:
+        description: Unauthorized
     """
     try:
         record = RecordService.create_record(request.json, g.current_user.id)
-
-        return success_response(record.to_dict(), "record created")
-
+        return success_response(record.to_dict(), "record created successfully", 201)
     except ValueError as e:
         return error_response(str(e), 400)
 
@@ -175,25 +175,24 @@ def edit_record(record_id):
         in: path
         type: string
         required: true
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              amount:
-                type: number
-              type:
-                type: string
-                enum: [income, expense]
-              category_id:
-                type: string
-              record_date:
-                type: string
-                format: date
-              notes:
-                type: string
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          properties:
+            amount:
+              type: number
+            type:
+              type: string
+              enum: [income, expense]
+            category_id:
+              type: string
+            record_date:
+              type: string
+              format: date
+            notes:
+              type: string
     responses:
       200:
         description: Record updated successfully

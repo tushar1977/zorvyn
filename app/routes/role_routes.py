@@ -44,19 +44,18 @@ def assign_role(user_id):
         in: path
         type: string
         required: true
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - role
-            properties:
-              role:
-                type: string
-                enum: [admin, analyst, viewer]
-                example: analyst
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - role
+          properties:
+            role:
+              type: string
+              enum: [admin, analyst, viewer]
+              example: analyst
     responses:
       200:
         description: Role updated successfully
